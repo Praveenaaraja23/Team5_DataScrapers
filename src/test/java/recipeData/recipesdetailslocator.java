@@ -10,14 +10,14 @@ public class recipesdetailslocator {
 	// private JavascriptExecutor js;
 	 private WebDriver driver;
 	    private JavascriptExecutor js;
-
+/*
 	    public recipesdetailslocator() {
 	        this.driver = Baseclass.getDriver(); // Make sure driver is already initialized
 	        if (driver == null) {
 	            throw new IllegalStateException("WebDriver is not initialized.");
 	        }
 	        this.js = (JavascriptExecutor) driver;
-	    }
+	    } 
 
 	    public void removeAds() {
 	        try {
@@ -27,4 +27,5 @@ public class recipesdetailslocator {
 	            System.out.println("Error removing ads: " + e.getMessage());
 	        }
 	    }
+	    */
 	}
