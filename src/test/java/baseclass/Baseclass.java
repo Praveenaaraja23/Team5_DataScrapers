@@ -2,6 +2,7 @@
 	
 	import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.PageLoadStrategy;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -9,9 +10,11 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 	import org.testng.annotations.AfterClass;
-	import org.testng.annotations.BeforeClass;
-	
-	import Utils.ConfigReader;
+import org.testng.annotations.AfterTest;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeTest;
+
+import Utils.ConfigReader;
 	
 	import java.io.File;
 	import java.io.FileInputStream;
@@ -24,6 +27,27 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 	
 	public class Baseclass {
 		
+		public static WebDriver driver;
+		@BeforeTest
+		public void setup() {
+		  //WebDriverManager.chromedriver().setup();
+			System.setProperty("webdriver.chrome.driver","C:\\Users\\Umadevi\\eclipse-workspace\\Team5_DataScrapers\\Drivers\\chromedriver.exe");
+		  ChromeOptions chromeoptions=new ChromeOptions();
+		  chromeoptions.setPageLoadStrategy(PageLoadStrategy.NORMAL);
+		  chromeoptions.addArguments("--disable-features=RendererCodeIntegrity");
+
+		  chromeoptions.setPageLoadTimeout(Duration.ofSeconds(90));
+			driver=	new ChromeDriver(chromeoptions);
+			driver.manage().window().maximize();
+			driver.navigate().to(ConfigReader.getBaseUrl());
+		}		
+		@AfterTest
+		public void teardown() {
+			
+		}
+		
+		
+		/*  Praveena
 		 public static WebDriver driver;
 		 protected static WebDriverWait wait;
 	
@@ -57,8 +81,9 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 
 		    @AfterClass(alwaysRun = true)
 		    public void tearDown() {
-		        if (driver != null) {
-		            driver.quit();
+		      if (driver != null) {
+		           driver.quit();
 		        }
 		    }
+		    */
 		}
