@@ -9,9 +9,11 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 	import org.testng.annotations.AfterClass;
-	import org.testng.annotations.BeforeClass;
-	
-	import Utils.ConfigReader;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
+
+import Utils.ConfigReader;
 	
 	import java.io.File;
 	import java.io.FileInputStream;
@@ -31,7 +33,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 		        return driver;
 		    }
 	
-		  @BeforeClass(alwaysRun = true)
+		  @BeforeMethod(alwaysRun = true)
 		    public void setupChromeDriver() {			  	
 		        String browser = ConfigReader.getBrowser();
 		        if (!browser.equalsIgnoreCase("chrome")) {
@@ -68,7 +70,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 		      
 		    }
 		  
-		    @AfterClass(alwaysRun = true)
+		    @AfterMethod
 		    public void tearDown() {
 		        if (driver != null) {
 		            driver.quit();

@@ -15,19 +15,22 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import static org.testng.Assert.assertEquals;
+
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import baseclass.Baseclass;
+import Utils.DataProviders;
+import Utils.ExcelReader;
 
 public class Recipescrapper extends Baseclass{
 
     private WebDriver driver;
     private WebDriverWait wait;
-    Databases DB;    
-    private String url = "https://m.tarladalal.com/";
+    Databases DB;        
     private List<recipesdetailslocator> allRecipes = new ArrayList<>();
     JavascriptExecutor js;
     private static final Logger logger = LoggerFactory.getLogger(Recipescrapper.class);
@@ -64,6 +67,15 @@ public class Recipescrapper extends Baseclass{
         DB.insertRecipesIntoDatabase(allRecipes);
     }
     
+    @Test(priority = 2)
+	public void Queries() {		
+		
+    	Object Data[][] = ExcelReader.readExcelData("Final list for LCHFElimination ");
+		// To get Eliminate - Data[][0]
+    	// To get Add 		- Data[][1]
+    	    
+	}
+    
     public List<String> collectAllRecipeLinks() throws InterruptedException {
     	
     	By recipeContainerLocator = By.xpath("(//div[@class='container'])[3]");
@@ -74,8 +86,7 @@ public class Recipescrapper extends Baseclass{
         int count = 0;
 
     	while (true) {            
-    		try {
-    			//driver.get("https://www.tarladalal.com/recipesearch/?query=&page=57");
+    		try {    			
     			
     			String pageSource = driver.getPageSource();
     			if (pageSource.contains("Server Error")) {
@@ -95,6 +106,7 @@ public class Recipescrapper extends Baseclass{
     		
 	            // 2. Find all recipe links within the container
 	            List<WebElement> recipeLinkElements = recipeContainer.findElements(recipeLinkInContainerLocator);
+	            if (count >= 41)	// start page
 	            for (WebElement linkElement : recipeLinkElements) {
 	                String href = linkElement.getAttribute("href");
 	                if (href != null && !href.isEmpty() && uniqueHrefs.add(href)) {
@@ -118,7 +130,7 @@ public class Recipescrapper extends Baseclass{
 	                	logger.info("An error occurred while clicking 'Next': " + e.getMessage());
 	                }
 	            	count++;
-	            	if(count == 3) // No of pages to load
+	            	if(count == 50) // No of pages to load
 	            		break;	
 	            }
     		}
