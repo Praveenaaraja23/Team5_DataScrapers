@@ -58,23 +58,24 @@ public class Databases {
     }
 	
 	public void insertRecipesIntoDatabase(List<recipesdetailslocator> allRecipes) {
-        String insertQuery = "INSERT INTO recipes (Recipe_Name, Recipe_Category, Food_Category, Ingredients, Preparation_Time, Cooking_Time, Tag, No_of_servings, Cuisine_category, Recipe_Description, Preparation_method, Nutrient_values, Recipe_URL) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT (Recipe_URL) DO NOTHING";
+        String insertQuery = "INSERT INTO recipes (Recipe_ID, Recipe_Name, Recipe_Category, Food_Category, Ingredients, Preparation_Time, Cooking_Time, Tag, No_of_servings, Cuisine_category, Recipe_Description, Preparation_method, Nutrient_values, Recipe_URL) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT (Recipe_URL) DO NOTHING";
 
         try (PreparedStatement preparedStatement = connection.prepareStatement(insertQuery)) {
             for (recipesdetailslocator recipe : allRecipes) {
-                preparedStatement.setString(1, recipe.getRecipeName());
-                preparedStatement.setString(2, recipe.getRecipeCategory());
-                preparedStatement.setString(3, recipe.getFoodCategory());
-                preparedStatement.setString(4, recipe.getIngredients());
-                preparedStatement.setString(5, recipe.getPreparationTime());
-                preparedStatement.setString(6, recipe.getCookingTime());
-                preparedStatement.setString(7, recipe.getTag());
-                preparedStatement.setString(8, recipe.getNoOfServings());
-                preparedStatement.setString(9, recipe.getCuisineCategory());
-                preparedStatement.setString(10, recipe.getRecipeDescription());
-                preparedStatement.setString(11, recipe.getPreparationMethod());
-                preparedStatement.setString(12, recipe.getNutrientValues());
-                preparedStatement.setString(13, recipe.getRecipeURL());
+            	preparedStatement.setInt(1, recipe.getRecipeID());
+                preparedStatement.setString(2, recipe.getRecipeName());
+                preparedStatement.setString(3, recipe.getRecipeCategory());
+                preparedStatement.setString(4, recipe.getFoodCategory());
+                preparedStatement.setString(5, recipe.getIngredients());
+                preparedStatement.setString(6, recipe.getPreparationTime());
+                preparedStatement.setString(7, recipe.getCookingTime());
+                preparedStatement.setString(8, recipe.getTag());
+                preparedStatement.setString(9, recipe.getNoOfServings());
+                preparedStatement.setString(10, recipe.getCuisineCategory());
+                preparedStatement.setString(11, recipe.getRecipeDescription());
+                preparedStatement.setString(12, recipe.getPreparationMethod());
+                preparedStatement.setString(13, recipe.getNutrientValues());
+                preparedStatement.setString(14, recipe.getRecipeURL());
                 preparedStatement.executeUpdate();
             }
             logger.info("Successfully inserted " + allRecipes.size() + " recipes into the database.");

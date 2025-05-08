@@ -15,16 +15,17 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import static org.testng.Assert.assertEquals;
-
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import baseclass.Baseclass;
-import Utils.DataProviders;
 import Utils.ExcelReader;
+import Utils.ConfigReader;
 
 public class Recipescrapper extends Baseclass{
 
@@ -49,9 +50,11 @@ public class Recipescrapper extends Baseclass{
     public void scrapeAndStoreRecipes() throws InterruptedException {
 
         // Find all recipe links       
-        WebElement searchIcon = wait.until(ExpectedConditions.elementToBeClickable(By.xpath("(//i[@class='fa fa-search'])[1]")));
-        js.executeScript("arguments[0].click();", searchIcon);
+        //WebElement searchIcon = wait.until(ExpectedConditions.elementToBeClickable(By.xpath("(//i[@class='fa fa-search'])[1]")));
+    	WebElement searchIcon = wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//a[text()='Recipes List']")));
+    	js.executeScript("arguments[0].click();", searchIcon);
         
+    	 	
         Set<String> seenHrefs = new HashSet<>();
         List<String> allRecipeHrefs = collectAllRecipeLinks();
 
@@ -63,6 +66,19 @@ public class Recipescrapper extends Baseclass{
                 //break;
             }            
         }
+
+        DB.insertRecipesIntoDatabase(allRecipes);
+    }
+    
+    @Test
+    public void scrapeAndStoreRecipe_single() throws InterruptedException {
+
+        // For Single Recipe 
+    	String recipeHref = "https://www.tarladalal.com/sprouts-misal-protein-rich-recipes-33239r";
+        driver.get(recipeHref);      
+        
+    	logger.info(recipeHref);
+        scrapeRecipeDetails(recipeHref);                
 
         DB.insertRecipesIntoDatabase(allRecipes);
     }
@@ -80,25 +96,25 @@ public class Recipescrapper extends Baseclass{
     	
     	By recipeContainerLocator = By.xpath("(//div[@class='container'])[3]");
         By recipeLinkInContainerLocator = By.xpath("//div[@class='img-block']/a");
-        By nextPageButtonLocator = By.xpath("//a[contains(text(), 'Next')]");
+        //By nextPageButtonLocator = By.xpath("//a[contains(text(), 'Next')]");
         List<String> allHrefs = new ArrayList<>();
         Set<String> uniqueHrefs = new HashSet<>();     
-        int count = 0;
-
+        Integer count = 1;	// Start Page
+        String PageUrl = ConfigReader.getPaginationUrlPattern();
+        String TotalPages = wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//a[text()='Next']/../preceding-sibling::li[1]/a"))).getText();
+    	String Url = null;
+        
+    	//TotalPages = "100";	//Last Page
     	while (true) {            
-    		try {    			
+    		try {
+    			Url = PageUrl + count.toString();
+    			driver.get(Url);
     			
     			String pageSource = driver.getPageSource();
     			if (pageSource.contains("Server Error")) {
     			    logger.info("Server Error 500 encountered!");
-    			    String url = driver.getCurrentUrl();
-    			    int pageIndex = url.indexOf("&page=");
-    			    String baseUrl = url.substring(0, pageIndex + "&page=".length());
-    			    String pageNumberStr = url.substring(pageIndex + "&page=".length());
-    			    int currentPage = Integer.parseInt(pageNumberStr);
-    			    currentPage++;
-    			    url = baseUrl + currentPage;
-    			    driver.get(url);    			    
+    			    count++;
+    			    continue;    			    
     			}    			
     			
     			// 1. Wait for the recipe container to be present
@@ -106,38 +122,22 @@ public class Recipescrapper extends Baseclass{
     		
 	            // 2. Find all recipe links within the container
 	            List<WebElement> recipeLinkElements = recipeContainer.findElements(recipeLinkInContainerLocator);
-	            if (count >= 51)	// start page
+	            if (count >= 1)	// start page
 	            for (WebElement linkElement : recipeLinkElements) {
 	                String href = linkElement.getAttribute("href");
 	                if (href != null && !href.isEmpty() && uniqueHrefs.add(href)) {
 	                    allHrefs.add(href);
 	                }
-	            }    		
-    		
-	            // 3. Try to find the "Next" page button            
-	    		WebElement nextPageButton = null;
-	            nextPageButton = driver.findElement(nextPageButtonLocator);
-	            if (nextPageButton == null)
-	            {
-	            	logger.info("No more 'Next' page found.");
-	                break;
-	            }
-	            else
-	            {	                        	
-	            	try {
-	            		js.executeScript("arguments[0].click();", nextPageButton);	                    	                    
-	                } catch (Exception e) {
-	                	logger.info("An error occurred while clicking 'Next': " + e.getMessage());
-	                }
-	            	count++;
-	            	if(count == 80) // No of pages to load
-	            		break;	
-	            }
+	            }  
+	            	
     		}
     		catch (Exception e) {
             	//Check for Ads
     			checkforAd();
-            }            
+            }     
+    		count++;
+        	if(count == Integer.parseInt(TotalPages) + 1) // No of pages to load
+        		break;
         }
 
     	logger.info("Finished collecting all recipe links. Total unique: " + allHrefs.size());
@@ -161,9 +161,23 @@ public class Recipescrapper extends Baseclass{
         driver.get(recipeURL);
         recipesdetailslocator recipe = new recipesdetailslocator();
         recipe.setRecipeURL(recipeURL);
+        
+        // Recipe id
+        Pattern pattern = Pattern.compile("([0-9]+)r$");
+        Matcher matcher = pattern.matcher(recipeURL);        
+        String extractedDigits = null; // Initialize extractedDigits
+        if (matcher.find()) {
+            extractedDigits = matcher.group(1);            
+            recipe.setRecipeID(Integer.parseInt(extractedDigits));
+        } else {        	
+        	recipe.setRecipeID(999999);
+        }
 
         try {
-            recipe.setRecipeName(driver.findElement(By.xpath("(//div[@class='ingredients']/h4/span)[1]")).getText().replaceFirst("For ", ""));
+        	int lastSlashIndex = recipeURL.lastIndexOf('/');
+        	String pathComponent = recipeURL.substring(lastSlashIndex + 1);
+        	String namePart = pathComponent.replaceAll("-[0-9]+r$", "");
+            recipe.setRecipeName(namePart.replace('-', ' '));
 
             // Recipe categories
             String RecipeText = driver.findElement(By.xpath("//ul[@class='tags-list']")).getText().toLowerCase();
@@ -181,14 +195,18 @@ public class Recipescrapper extends Baseclass{
             }
                    
             // Ingredients
-            WebElement ingredientsElement = driver.findElement(By.id("ingredients"));
-            List<WebElement> ingredientListItems = ingredientsElement.findElements(By.tagName("p"));
-            StringBuilder ingredients = new StringBuilder();
-            for (WebElement li : ingredientListItems) {
-                ingredients.append(li.getText()).append("\n");
+            try {
+	            WebElement ingredientsElement = driver.findElement(By.id("ingredients"));
+	            List<WebElement> ingredientListItems = ingredientsElement.findElements(By.tagName("p"));
+	            StringBuilder ingredients = new StringBuilder();
+	            for (WebElement li : ingredientListItems) {
+	                ingredients.append(li.getText()).append("\n");
+	            }
+	            recipe.setIngredients(ingredients.toString().trim());
             }
-            recipe.setIngredients(ingredients.toString().trim());
-            
+            catch(Exception e) {
+            	recipe.setIngredients(" ");
+            }
             // Food Category
             String FoodText = recipe.getIngredients().toLowerCase();
             
@@ -234,7 +252,7 @@ public class Recipescrapper extends Baseclass{
 
             // Cuisine Category
             try {
-	            WebElement cuisineElement = driver.findElement(By.xpath("//*[text()='Cuisine  ']/../following-sibling::span[1]/a"));
+	            WebElement cuisineElement = driver.findElement(By.xpath("//*[contains(text(),'Cuisine')]/../following-sibling::span[1]/a"));
 	            if (cuisineElement != null) {
 	                recipe.setCuisineCategory(cuisineElement.getText());
 	            }
@@ -300,8 +318,8 @@ public class Recipescrapper extends Baseclass{
     @AfterMethod
     public void tearDown() {
         DB.close();
-       // if (driver != null) {
-       //     driver.quit();
-       // }
+        if (driver != null) {
+            driver.quit();
+        }
     }
 }
