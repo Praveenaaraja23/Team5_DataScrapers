@@ -5,9 +5,10 @@
     <classes>
       <class name="recipesTests.Recipescrapper">
         <methods>
-          <include name="teardown"/>
-          <include name="setup"/>
-          <include name="navigateAndScrapeRecipes"/>
+          <include name="setupChromeDriver"/>
+          <include name="tearDown"/>
+          <include name="setUp"/>
+          <include name="scrapeAndStoreRecipes"/>
         </methods>
       </class> <!-- recipesTests.Recipescrapper -->
     </classes>
