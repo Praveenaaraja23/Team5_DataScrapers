@@ -36,7 +36,7 @@ public class Recipescrapper {
 	        wait = new WebDriverWait(driver, Duration.ofSeconds(15));
 	        js = (JavascriptExecutor) driver;
 	        DB = new Databases();
-	        DB.connectToDatabase();
+	        DB.createAndConnectToDatabase();
 	        DB.RecipeScraper();
 	    }
 
