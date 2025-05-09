@@ -4,9 +4,15 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Properties;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import recipes_Database.Databases;
+
 public class ConfigReader {
 
 	private static Properties prop;
+	 private static final Logger logger = LoggerFactory.getLogger(ConfigReader.class);
 
     static {
         loadConfig();
@@ -17,7 +23,7 @@ public class ConfigReader {
             prop = new Properties();
             prop.load(fis);
         } catch (IOException e) {
-            System.err.println("Failed to load config.properties: " + e.getMessage());
+        	 logger.info("Failed to load config.properties: " + e.getMessage());
             e.printStackTrace();
         }
     }
