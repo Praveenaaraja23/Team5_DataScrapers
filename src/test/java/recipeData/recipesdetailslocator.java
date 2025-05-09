@@ -2,7 +2,7 @@ package recipeData;
 
 public class recipesdetailslocator {
 	
-    private Integer recipeID;
+    private int recipeID;
     private String recipeName;
     private String recipeCategory;
     private String foodCategory;
@@ -16,12 +16,20 @@ public class recipesdetailslocator {
     private String preparationMethod;
     private String nutrientValues;
     private String recipeURL;
+   
+    
+   
 
-    public Integer getRecipeID() {
+    public String getTitle() {
+        return recipeName;
+    }
+
+    
+    public int getRecipeID() {
         return recipeID;
     }
 
-    public void setRecipeID(Integer recipeID) {
+    public void setRecipeID(int recipeID) {
         this.recipeID = recipeID;
     }
 
