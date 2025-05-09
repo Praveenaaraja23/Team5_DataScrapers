@@ -10,47 +10,57 @@ import recipeData.recipesdetailslocator;
 
 public class Databases {
 
-    private Connection connection;
+   private Connection connection;
     private static final Logger logger = LoggerFactory.getLogger(Databases.class);
     private Statement stmt;
     private ResultSet rs;
 
-    public void connectToDatabase() {
-        String dbUrl = "jdbc:postgresql://localhost:5432/newfilterdatap"; 
-        String dbUser = "postgres"; 
-        String dbPassword = "postgres"; 
-        
-        try {
-            connection = DriverManager.getConnection(dbUrl, dbUser, dbPassword);
-            stmt = connection.createStatement();
-            
-            logger.info("Connected to PostgreSQL database");
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-	}
-    
-    public void closeConnection() 
-    {        
-        try {
-            connection.close();
-            logger.info("Connected to PostgreSQL database");
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-	}
-     
+    private final String dbName = "RecipeScraper"; // Your target DB
+    private final String dbUser = "postgres";
+    private final String dbPassword = "postgres";
 
-     /*   try {
+    public void createAndConnectToDatabase() {
+        String defaultDbUrl = "jdbc:postgresql://localhost:5432/postgres"; // Connect to default DB first
+
+        try (Connection defaultConn = DriverManager.getConnection(defaultDbUrl, dbUser, dbPassword);
+             Statement defaultStmt = defaultConn.createStatement()) {
+
+            String checkDbExistsQuery = "SELECT 1 FROM pg_database WHERE datname = '" + dbName + "'";
+            ResultSet rs = defaultStmt.executeQuery(checkDbExistsQuery);
+
+            if (!rs.next()) {
+                String createDbSQL = "CREATE DATABASE " + dbName;
+                defaultStmt.executeUpdate(createDbSQL);
+                logger.info("Database created successfully: " + dbName);
+            } else {
+                logger.info("Database already exists: " + dbName);
+            }
+
+            rs.close();
+
+        } catch (SQLException e) {
+            logger.error("Error checking/creating database: {}", e.getMessage());
+            return;
+        }
+
+        // Now connect to the new/target database
+        connectToDatabase();
+    }
+
+    public void connectToDatabase() {
+        String dbUrl = "jdbc:postgresql://localhost:5432/" + dbName;
+
+        try {
             connection = DriverManager.getConnection(dbUrl, dbUser, dbPassword);
             stmt = connection.createStatement();
+            logger.info("Connected to database: " + dbName);
         } catch (SQLException e) {
-            logger.error("Database connection or creation error: {}", e.getMessage());
+            logger.error("Error connecting to database '{}': {}", dbName, e.getMessage());
         }
-    }*/
+    }
 
        
-    public void filterdatap() {
+    public void RecipeScraper() {
         String fullSchema = "(" +
                 "Recipe_ID SERIAL PRIMARY KEY," +
                 "Recipe_Name VARCHAR(255)," +
