@@ -133,43 +133,8 @@ public class Recipescrapper {
 	    
 	    
 	    public List<String> collectAllRecipeLinks() throws InterruptedException {
-	        By recipeContainerLocator = By.xpath("(//div[@class='container'])[3]");
-	        By recipeLinkInContainerLocator = By.xpath("//div[@class='img-block']/a");
-	        By nextPageButtonLocator = By.xpath("//a[contains(text(), 'Next')]");
-	        List<String> allHrefs = new ArrayList<>();
-	        Set<String> uniqueHrefs = new HashSet<>();
-	        int count = 0;
-
-	        while (true) {
-	            try {
-	                WebElement recipeContainer = wait.until(ExpectedConditions.presenceOfElementLocated(recipeContainerLocator));
-	                List<WebElement> recipeLinkElements = recipeContainer.findElements(recipeLinkInContainerLocator);
-	                for (WebElement linkElement : recipeLinkElements) {
-	                    String href = linkElement.getAttribute("href");
-	                    if (href != null && !href.isEmpty() && uniqueHrefs.add(href)) {
-	                        allHrefs.add(href);
-	                    }
-	                }
-	                WebElement nextPageButton = driver.findElement(nextPageButtonLocator);
-	                if (nextPageButton == null) break;
-
-	                try {
-	                    js.executeScript("arguments[0].click();", nextPageButton);
-	                } catch (Exception e) {
-	                    logger.info("Error clicking 'Next': " + e.getMessage());
-	                }
-
-	                count++;
-	                if (count == 1) break;
-	            } catch (Exception e) {
-	                checkforAd();
-	            }
-	        }
-
-	        logger.info("Collected recipe links: " + allHrefs.size());
-	        return allHrefs;
-	    }
-/*By recipeContainerLocator = By.xpath("(//div[@class='container'])[3]");
+	        
+By recipeContainerLocator = By.xpath("(//div[@class='container'])[3]");
         By recipeLinkInContainerLocator = By.xpath("//div[@class='img-block']/a");
         //By nextPageButtonLocator = By.xpath("//a[contains(text(), 'Next')]");
         List<String> allHrefs = new ArrayList<>();
@@ -217,7 +182,7 @@ public class Recipescrapper {
 
     	logger.info("Finished collecting all recipe links. Total unique: " + allHrefs.size());
         return allHrefs;
-    } */
+    } 
 	    public void checkforAd() {
 	        try {
 	            WebElement adOverlay = driver.findElement(By.xpath("//div[@id='card']"));
