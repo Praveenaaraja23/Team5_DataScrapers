@@ -37,7 +37,7 @@ public class Recipescrapper {
 	        js = (JavascriptExecutor) driver;
 	        DB = new Databases();
 	        DB.connectToDatabase();
-	        DB.filterdatap();
+	        DB.RecipeScraper();
 	    }
 
 	    @Test
